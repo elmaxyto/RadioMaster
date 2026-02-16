@@ -708,7 +708,7 @@
                 document.getElementById('manifest-placeholder').setAttribute('href', URL.createObjectURL(blob));
             }
             registerServiceWorker() {
-                const swCode = `const CACHE='rm-v1'; self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['./'])))); self.addEventListener('fetch',e=>e.respondWith(fetch(e.request).catch(()=>caches.match(e.request))));`;
+                const swCode = `const CACHE_VERSION = 'rm-v2'; const CACHE_NAME = CACHE_VERSION; self.addEventListener('install', (e) => { e.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(['./'])).then(() => self.skipWaiting())); }); self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then(cacheNames => { return Promise.all(cacheNames.map(cacheName => { if (cacheName !== CACHE_NAME) { return caches.delete(cacheName); } })); })); }); self.addEventListener('fetch', (e) => { e.respondWith(caches.match(e.request).then(response => { return response || fetch(e.request); })); });`;
                 const blob = new Blob([swCode], {type: 'application/javascript'});
                 if ('serviceWorker' in navigator) navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
             }
